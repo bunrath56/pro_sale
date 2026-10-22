@@ -1,0 +1,8 @@
+{
+  "name": "Master IT - Sales Tracker",
+  "description": "Comprehensive Daily Sales Tracker \u0026 Conversion Rate Analytics for Master IT.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

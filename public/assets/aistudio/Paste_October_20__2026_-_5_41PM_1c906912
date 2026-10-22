@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Master IT - Comprehensive Sales Tracker</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Kantumruy+Pro:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Kantumruy Pro', sans-serif; background-color: #f0f2f5; }
+        .hidden { display: none; }
+        .rate { font-size: 0.75rem; color: #6b7280; margin-left: 4px; font-weight: normal; }
+    </style>
+</head>
+<body class="p-4 md:p-8">
+
+    <div class="max-w-7xl mx-auto bg-white rounded-xl shadow-lg p-6">
+        <!-- Header -->
+        <div class="border-b pb-4 mb-6 flex flex-col md:flex-row justify-between items-center gap-4">
+            <div>
+                <h1 class="text-2xl font-bold text-blue-900"> Master IT School - Phnom Penh</h1>
+                <p class="text-gray-500 text-sm">ប្រព័ន្ធគ្រប់គ្រងរបាយការណ៍លក់ប្រចាំថ្ងៃ និងវិភាគអត្រាបំប្លែង (Full Suite)</p>
+            </div>
+            <div class="flex flex-wrap gap-2">
+                <button onclick="switchTab('input')" id="btn-input" class="px-4 py-2 rounded-lg font-bold bg-blue-600 text-white shadow">📝 បញ្ចូលទិន្នន័យ</button>
+                <button onclick="switchTab('dashboard')" id="btn-dashboard" class="px-4 py-2 rounded-lg font-bold bg-gray-200 text-gray-700 hover:bg-gray-300">📊 របាយការណ៍</button>
+                <button onclick="switchTab('settings')" id="btn-settings" class="px-4 py-2 rounded-lg font-bold bg-gray-200 text-gray-700 hover:bg-gray-300">⚙️ ការកំណត់</button>
+            </div>
+        </div>
+
+        <!-- 1. DATA ENTRY FORM TAB -->
+        <div id="tab-input-content">
+            <form id="salesForm" class="space-y-6">
+                <!-- Date Picker -->
+                <div class="bg-blue-50 p-4 rounded-lg border border-blue-200 flex items-center justify-between">
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-1">កាលបរិច្ឆេទ (Date)</label>
+                        <input type="date" id="inputDate" class="w-full md:w-64 p-2.5 border rounded-lg bg-white" required>
+                    </div>
+                </div>
+
+                <!-- Section 1: New Leads -->
+                <div class="border rounded-lg p-4 bg-white shadow-sm overflow-x-auto">
+                    <h3 class="text-lg font-bold text-blue-800 mb-3 border-b pb-2">១. លំហូរ New Leads (Inbound ពី Marketing & Walk-in)</h3>
+                    <table class="w-full text-sm text-left border-collapse">
+                        <thead class="bg-gray-100 text-gray-700">
+                            <tr>
+                                <th class="p-2 border-b">ប្រភព Lead</th>
+                                <th class="p-2 border-b">Leads ចូលថ្មី</th>
+                                <th class="p-2 border-b">Qualified</th>
+                                <th class="p-2 border-b">Negotiation</th>
+                                <th class="p-2 border-b">Won (បិទបាន)</th>
+                                <th class="p-2 border-b bg-blue-50 text-blue-800">ចំណូល ($)</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y" id="newLeadsInputs"></tbody>
+                    </table>
+                </div>
+
+                <!-- Section 2: Outbound & Follow-up -->
+                <div class="border rounded-lg p-4 bg-white shadow-sm overflow-x-auto">
+                    <h3 class="text-lg font-bold text-green-800 mb-3 border-b pb-2">២. សកម្មភាពទាក់ទង (Outbound Prospecting & Follow-up)</h3>
+                    <table class="w-full text-sm text-left border-collapse">
+                        <thead class="bg-gray-100 text-gray-700">
+                            <tr>
+                                <th class="p-2 border-b">ប្រភេទសកម្មភាព</th>
+                                <th class="p-2 border-b">សកម្មភាព (Acts)</th>
+                                <th class="p-2 border-b">រកបាន / Qualify</th>
+                                <th class="p-2 border-b">Negotiation</th>
+                                <th class="p-2 border-b">Won (បិទបាន)</th>
+                                <th class="p-2 border-b bg-green-50 text-green-800">ចំណូល ($)</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y" id="fuInputs"></tbody>
+                    </table>
+                </div>
+
+                <div class="bg-indigo-50 p-4 rounded-lg border border-indigo-200 flex flex-col md:flex-row justify-between items-center">
+                    <h3 class="text-lg font-bold text-indigo-900">💰 ចំណូលសរុបប្រចាំថ្ងៃ (Total Daily Revenue):</h3>
+                    <span id="dailyTotalRevenueDisplay" class="text-3xl font-bold text-indigo-700 mt-2 md:mt-0">$0</span>
+                </div>
+
+                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg shadow-lg text-lg">
+                    💾 រក្សាទុកទិន្នន័យប្រចាំថ្ងៃ
+                </button>
+            </form>
+        </div>
+
+        <!-- 2. DASHBOARD TAB -->
+        <div id="tab-dashboard-content" class="hidden space-y-8">
+            
+            <div class="border border-blue-200 rounded-lg p-4 bg-white shadow-sm">
+                <div class="flex flex-col md:flex-row items-center justify-between gap-4 mb-4">
+                    <h2 class="text-xl font-bold text-blue-900 border-l-4 border-blue-600 pl-2">ផ្នែកទី ១៖ របាយការណ៍សង្ខេប (Today vs MTD)</h2>
+                    <div class="flex items-center gap-2 bg-blue-50 p-2 rounded border border-blue-100">
+                        <label class="font-bold text-blue-800 text-sm">មើលរបាយការណ៍ត្រឹមថ្ងៃទី:</label>
+                        <input type="date" id="dashSingleDate" class="p-1.5 border rounded bg-white text-sm" onchange="renderDashboard()">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
+                    <div class="bg-blue-600 text-white p-4 rounded-xl shadow">
+                        <p class="text-xs font-semibold opacity-80">ចំណូល MTD (Total Revenue)</p>
+                        <p class="text-2xl font-bold mt-1" id="cardRevenue">$0</p>
+                    </div>
+                    <div class="bg-emerald-600 text-white p-4 rounded-xl shadow">
+                        <p class="text-xs font-semibold opacity-80">សិស្សបិទបាន (Won Customers)</p>
+                        <p class="text-2xl font-bold mt-1" id="cardWon">0 នាក់</p>
+                    </div>
+                    <div class="bg-indigo-600 text-white p-4 rounded-xl shadow">
+                        <p class="text-xs font-semibold opacity-80">New Leads ចូលសរុប (MTD)</p>
+                        <p class="text-2xl font-bold mt-1" id="cardLeads">0</p>
+                    </div>
+                    <div class="bg-purple-600 text-white p-4 rounded-xl shadow">
+                        <p class="text-xs font-semibold opacity-80">សកម្មភាពខលចេញរួម (MTD Acts)</p>
+                        <p class="text-2xl font-bold mt-1" id="cardFU">0</p>
+                    </div>
+                </div>
+
+                <div class="overflow-x-auto border rounded">
+                    <table class="w-full text-sm text-left border-collapse min-w-[800px]">
+                        <thead class="bg-blue-900 text-white">
+                            <tr>
+                                <th class="p-3 border-b">សូចនាករ / ប្រភពសកម្មភាព</th>
+                                <th class="p-3 border-b text-center">Today Actual</th>
+                                <th class="p-3 border-b text-center">Daily Target</th>
+                                <th class="p-3 border-b text-center">MTD Actual</th>
+                                <th class="p-3 border-b text-center">Monthly Target</th>
+                                <th class="p-3 border-b text-center">% MTD Pacing</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y font-medium" id="dashSummaryTable"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- SHARED DATE RANGE FILTER -->
+            <div class="bg-gray-800 text-white p-4 rounded-lg flex flex-col md:flex-row items-center justify-between gap-4 shadow-md">
+                <h2 class="font-bold">ការកំណត់ចន្លោះពេល សម្រាប់របាយការណ៍ផ្នែកទី២ និងទី៣៖</h2>
+                <div class="flex items-center gap-2">
+                    <label class="text-sm">ពីថ្ងៃទី:</label>
+                    <input type="date" id="startDate" class="p-1.5 border rounded bg-white text-gray-900 text-sm" onchange="renderDashboard()">
+                    <span class="font-bold">-</span>
+                    <label class="text-sm">ដល់ថ្ងៃទី:</label>
+                    <input type="date" id="endDate" class="p-1.5 border rounded bg-white text-gray-900 text-sm" onchange="renderDashboard()">
+                </div>
+            </div>
+
+            <!-- PART B: DETAILED REPORT -->
+            <div class="border border-gray-200 rounded-lg p-4 bg-white shadow-sm">
+                <h2 class="text-xl font-bold text-gray-800 border-l-4 border-gray-600 pl-2 mb-4">ផ្នែកទី ២៖ របាយការណ៍លម្អិត (Detailed Input Summary)</h2>
+                <h3 class="font-bold text-blue-800 mb-2">២.១ លទ្ធផល New Leads (សរុបក្នុងចន្លោះពេល)</h3>
+                <div class="overflow-x-auto border rounded mb-6">
+                    <table class="w-full text-sm text-left border-collapse">
+                        <thead class="bg-gray-100 text-gray-700">
+                            <tr>
+                                <th class="p-2 border-b">ប្រភព Lead</th>
+                                <th class="p-2 border-b text-center">Leads ចូលថ្មី</th>
+                                <th class="p-2 border-b text-center">Qualified</th>
+                                <th class="p-2 border-b text-center">Negotiation</th>
+                                <th class="p-2 border-b text-center">Won (បិទបាន)</th>
+                                <th class="p-2 border-b text-center bg-blue-50">ចំណូល ($)</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y" id="dashRawLeads"></tbody>
+                    </table>
+                </div>
+                <h3 class="font-bold text-green-800 mb-2">២.២ លទ្ធផលសកម្មភាពទាក់ទង (Outbound & Follow-up)</h3>
+                <div class="overflow-x-auto border rounded">
+                    <table class="w-full text-sm text-left border-collapse">
+                        <thead class="bg-gray-100 text-gray-700">
+                            <tr>
+                                <th class="p-2 border-b">ប្រភេទសកម្មភាព</th>
+                                <th class="p-2 border-b text-center">សកម្មភាព (Acts)</th>
+                                <th class="p-2 border-b text-center">រកបាន / Qualify</th>
+                                <th class="p-2 border-b text-center">Negotiation</th>
+                                <th class="p-2 border-b text-center">Won (បិទបាន)</th>
+                                <th class="p-2 border-b text-center bg-green-50">ចំណូល ($)</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y" id="dashRawFU"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- PART C: FUNNEL CONVERSION -->
+            <div class="border border-indigo-200 rounded-lg p-4 bg-white shadow-sm">
+                <h2 class="text-xl font-bold text-indigo-900 border-l-4 border-indigo-600 pl-2 mb-4">ផ្នែកទី ៣៖ របាយការណ៍វិភាគអត្រាបំប្លែង (Funnel Conversion Rates)</h2>
+                <div class="overflow-x-auto border rounded">
+                    <table class="w-full text-sm text-left border-collapse min-w-[800px]">
+                        <thead class="bg-gray-700 text-white">
+                            <tr>
+                                <th class="p-3 border-b">ប្រភព / សកម្មភាព</th>
+                                <th class="p-3 border-b text-center">Leads/Acts</th>
+                                <th class="p-3 border-b text-center">Qualified (Rate)</th>
+                                <th class="p-3 border-b text-center">Negotiation (Rate)</th>
+                                <th class="p-3 border-b text-center">Won (Close Rate)</th>
+                                <th class="p-3 border-b text-center bg-gray-800">អត្រាបំប្លែងរួម (Win Rate)</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y font-medium" id="dashFunnelTable"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. SETTINGS TAB (NEW) -->
+        <div id="tab-settings-content" class="hidden space-y-6">
+            <div class="bg-orange-50 border border-orange-200 p-4 rounded-lg">
+                <h2 class="text-xl font-bold text-orange-900 mb-2">⚙️ បន្ថែមប្រភព Lead ថ្មី (Add Custom Lead Source)</h2>
+                <p class="text-sm text-orange-800 mb-4">អ្នកអាចបង្កើតប្រភព Lead ថ្មីនៅទីនេះ។ នៅពេលបន្ថែមរួច វានឹងលោតចូលក្នុងទម្រង់បញ្ចូលទិន្នន័យ និងរបាយការណ៍ទាំងអស់ដោយស្វ័យប្រវត្តិ។</p>
+                
+                <form id="addSourceForm" class="bg-white p-4 rounded border shadow-sm grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-1">ឈ្មោះប្រភពថ្មី (ឧ. TikTok Ads)</label>
+                        <input type="text" id="newSourceName" class="w-full p-2 border rounded" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-1">Target ចំនួន Won ប្រចាំខែ</label>
+                        <input type="number" id="newSourceTgtW" class="w-full p-2 border rounded" value="0" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-1">Target ចំនួន Leads ប្រចាំខែ</label>
+                        <input type="number" id="newSourceTgtL" class="w-full p-2 border rounded" value="0" required>
+                    </div>
+                    <div class="md:col-span-3">
+                        <button type="submit" class="bg-orange-600 hover:bg-orange-700 text-white font-bold py-2 px-4 rounded shadow">
+                            + បន្ថែមប្រភពចូលទៅក្នុងប្រព័ន្ធ
+                        </button>
+                        <button type="button" onclick="resetDefaults()" class="ml-4 text-red-600 hover:underline text-sm font-bold">
+                            🔄 Reset ទៅកាន់ស្តង់ដារដើមវិញ
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <div class="bg-white border rounded-lg p-4 shadow-sm">
+                <h3 class="font-bold text-gray-800 mb-3">បញ្ជីប្រភព New Leads បច្ចុប្បន្ន៖</h3>
+                <ul id="sourceListDisplay" class="list-disc pl-5 text-sm space-y-1 text-gray-700"></ul>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // Default System Sources
+        const defaultSources = [
+            { id: 'ads', name: 'Paid Ads Lead', tgtW: 150, tgtL: 450, dtgtW: 6, dtgtL: 18 },
+            { id: 'ref', name: 'Referral Lead', tgtW: 60, tgtL: 180, dtgtW: 2, dtgtL: 7 },
+            { id: 'org', name: 'Organic Lead', tgtW: 45, tgtL: 135, dtgtW: 2, dtgtL: 5 },
+            { id: 'walk', name: 'Offline Walk-in', tgtW: 30, tgtL: 90, dtgtW: 1, dtgtL: 4 },
+            { id: 'evnt', name: 'Partners & Events', tgtW: 15, tgtL: 45, dtgtW: 1, dtgtL: 2 }
+        ];
+        
+        const defaultFUs = [
+            { id: 'outb', name: 'ស្វែងរក Lead ថ្មី (Cold Calls / Outbound)', tgtW: 30, tgtA: 1500, dtgtW: 1, dtgtA: 60 },
+            { id: 'futm', name: 'FU លើ This Month Leads', tgtW: 225, tgtA: 2700, dtgtW: 9, dtgtA: 108 },
+            { id: 'fupm', name: 'FU លើ Previous Month Leads', tgtW: 75, tgtA: 2400, dtgtW: 3, dtgtA: 96 }
+        ];
+
+        // Load Sources from LocalStorage (Dynamic Array)
+        let sources = JSON.parse(localStorage.getItem('masterit_custom_sources')) || defaultSources;
+        let fus = defaultFUs; // Keeping FUs static for now as they are core operations
+
+        const fmtMoney = (num) => '$' + num.toLocaleString();
+        const getRate = (part, total) => (!total || total === 0) ? '0%' : Math.round((part / total) * 100) + '%';
+
+        // Add Custom Source Logic
+        document.getElementById('addSourceForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const name = document.getElementById('newSourceName').value;
+            const tgtW = parseInt(document.getElementById('newSourceTgtW').value) || 0;
+            const tgtL = parseInt(document.getElementById('newSourceTgtL').value) || 0;
+            
+            const newSource = {
+                id: 'src_' + Date.now(), // Unique ID
+                name: name,
+                tgtW: tgtW,
+                tgtL: tgtL,
+                dtgtW: Math.round(tgtW / 25) || 0, // Assume 25 working days
+                dtgtL: Math.round(tgtL / 25) || 0
+            };
+            
+            sources.push(newSource);
+            localStorage.setItem('masterit_custom_sources', JSON.stringify(sources));
+            
+            alert('✅ ប្រភព [' + name + '] ត្រូវបានបន្ថែមដោយជោគជ័យ!');
+            this.reset();
+            initInputs(); // Refresh UI dynamically
+            renderSettingsList();
+        });
+
+        function resetDefaults() {
+            if(confirm("តើអ្នកពិតជាចង់លុបប្រភពដែលបានបន្ថែមថ្មីទាំងអស់ ហើយត្រលប់ទៅទម្រង់ស្តង់ដារដើមវិញឬទេ?")) {
+                localStorage.removeItem('masterit_custom_sources');
+                sources = [...defaultSources];
+                initInputs();
+                renderSettingsList();
+                alert("បាន Reset ជោគជ័យ!");
+            }
+        }
+
+        function renderSettingsList() {
+            const list = document.getElementById('sourceListDisplay');
+            list.innerHTML = '';
+            sources.forEach(s => {
+                list.innerHTML += `<li><b>${s.name}</b> (Target: ${s.tgtW} Won / ${s.tgtL} Leads)</li>`;
+            });
+        }
+
+        function calculateDailyTotal() {
+            let total = 0;
+            sources.forEach(s => {
+                const el = document.getElementById(`${s.id}_r`);
+                if(el) total += parseFloat(el.value) || 0;
+            });
+            fus.forEach(f => {
+                const el = document.getElementById(`${f.id}_r`);
+                if(el) total += parseFloat(el.value) || 0;
+            });
+            document.getElementById('dailyTotalRevenueDisplay').innerText = fmtMoney(total);
+        }
+
+        // Initialize Dynamic UI
+        function initInputs() {
+            const nlBody = document.getElementById('newLeadsInputs');
+            nlBody.innerHTML = ''; // Clear existing
+            sources.forEach(s => {
+                nlBody.innerHTML += `<tr>
+                    <td class="p-2 font-semibold text-gray-700">${s.name}</td>
+                    <td class="p-2"><input type="number" id="${s.id}_l" class="w-full p-1.5 border rounded" value="0"></td>
+                    <td class="p-2"><input type="number" id="${s.id}_q" class="w-full p-1.5 border rounded" value="0"></td>
+                    <td class="p-2"><input type="number" id="${s.id}_n" class="w-full p-1.5 border rounded" value="0"></td>
+                    <td class="p-2"><input type="number" id="${s.id}_w" class="w-full p-1.5 border rounded font-bold text-green-700" value="0"></td>
+                    <td class="p-2"><input type="number" id="${s.id}_r" oninput="calculateDailyTotal()" class="w-full p-1.5 border border-blue-300 rounded bg-blue-50 font-bold text-blue-700" value="0" placeholder="$"></td>
+                </tr>`;
+            });
+            
+            const fuBody = document.getElementById('fuInputs');
+            fuBody.innerHTML = '';
+            fus.forEach(f => {
+                fuBody.innerHTML += `<tr>
+                    <td class="p-2 font-semibold text-gray-700">${f.name}</td>
+                    <td class="p-2"><input type="number" id="${f.id}_a" class="w-full p-1.5 border rounded" value="0"></td>
+                    <td class="p-2"><input type="number" id="${f.id}_q" class="w-full p-1.5 border rounded" value="0"></td>
+                    <td class="p-2"><input type="number" id="${f.id}_n" class="w-full p-1.5 border rounded" value="0"></td>
+                    <td class="p-2"><input type="number" id="${f.id}_w" class="w-full p-1.5 border rounded font-bold text-green-700" value="0"></td>
+                    <td class="p-2"><input type="number" id="${f.id}_r" oninput="calculateDailyTotal()" class="w-full p-1.5 border border-green-300 rounded bg-green-50 font-bold text-green-700" value="0" placeholder="$"></td>
+                </tr>`;
+            });
+            renderSettingsList();
+        }
+        initInputs();
+
+        // Date Defaults
+        const today = new Date();
+        const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
+        const formatDate = (date) => date.toISOString().split('T')[0];
+        
+        document.getElementById('inputDate').value = formatDate(today);
+        document.getElementById('dashSingleDate').value = formatDate(today);
+        document.getElementById('startDate').value = formatDate(firstDay);
+        document.getElementById('endDate').value = formatDate(today);
+
+        // Tab Switcher
+        function switchTab(tab) {
+            document.getElementById('tab-input-content').classList.toggle('hidden', tab !== 'input');
+            document.getElementById('tab-dashboard-content').classList.toggle('hidden', tab !== 'dashboard');
+            document.getElementById('tab-settings-content').classList.toggle('hidden', tab !== 'settings');
+            
+            ['input', 'dashboard', 'settings'].forEach(t => {
+                document.getElementById(`btn-${t}`).className = tab === t 
+                    ? "px-4 py-2 rounded-lg font-bold bg-blue-600 text-white shadow" 
+                    : "px-4 py-2 rounded-lg font-bold bg-gray-200 text-gray-700 hover:bg-gray-300";
+            });
+            
+            if(tab === 'dashboard') renderDashboard();
+        }
+
+        // Save Record
+        document.getElementById('salesForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const date = document.getElementById('inputDate').value;
+            const rowData = { date: date };
+            let totalDailyRev = 0;
+            
+            sources.forEach(s => {
+                rowData[`${s.id}_l`] = parseInt(document.getElementById(`${s.id}_l`).value) || 0;
+                rowData[`${s.id}_q`] = parseInt(document.getElementById(`${s.id}_q`).value) || 0;
+                rowData[`${s.id}_n`] = parseInt(document.getElementById(`${s.id}_n`).value) || 0;
+                rowData[`${s.id}_w`] = parseInt(document.getElementById(`${s.id}_w`).value) || 0;
+                let rev = parseFloat(document.getElementById(`${s.id}_r`).value) || 0;
+                rowData[`${s.id}_r`] = rev;
+                totalDailyRev += rev;
+            });
+            fus.forEach(f => {
+                rowData[`${f.id}_a`] = parseInt(document.getElementById(`${f.id}_a`).value) || 0;
+                rowData[`${f.id}_q`] = parseInt(document.getElementById(`${f.id}_q`).value) || 0;
+                rowData[`${f.id}_n`] = parseInt(document.getElementById(`${f.id}_n`).value) || 0;
+                rowData[`${f.id}_w`] = parseInt(document.getElementById(`${f.id}_w`).value) || 0;
+                let rev = parseFloat(document.getElementById(`${f.id}_r`).value) || 0;
+                rowData[`${f.id}_r`] = rev;
+                totalDailyRev += rev;
+            });
+            
+            let store = JSON.parse(localStorage.getItem('masterit_sales')) || {};
+            store[date] = rowData;
+            localStorage.setItem('masterit_sales', JSON.stringify(store));
+            
+            alert('✅ ទិន្នន័យថ្ងៃទី ' + date + ' ត្រូវបានរក្សាទុកជោគជ័យ!');
+        });
+
+        // Main Dashboard Engine
+        function renderDashboard() {
+            const store = JSON.parse(localStorage.getItem('masterit_sales')) || {};
+            
+            // --- PART A ---
+            const singleDate = document.getElementById('dashSingleDate').value;
+            const todayData = store[singleDate] || {};
+            const selMonth = singleDate.substring(0, 7);
+            
+            let mtd = {};
+            sources.forEach(s => { mtd[`${s.id}_l`]=0; mtd[`${s.id}_w`]=0; mtd[`${s.id}_r`]=0; });
+            fus.forEach(f => { mtd[`${f.id}_a`]=0; mtd[`${f.id}_w`]=0; mtd[`${f.id}_r`]=0; });
+
+            let totalMtdRev = 0;
+            Object.keys(store).forEach(d => {
+                if (d.startsWith(selMonth) && d <= singleDate) {
+                    const r = store[d];
+                    sources.forEach(s => { mtd[`${s.id}_l`] += r[`${s.id}_l`]||0; mtd[`${s.id}_w`] += r[`${s.id}_w`]||0; mtd[`${s.id}_r`] += r[`${s.id}_r`]||0; totalMtdRev += r[`${s.id}_r`]||0; });
+                    fus.forEach(f => { mtd[`${f.id}_a`] += r[`${f.id}_a`]||0; mtd[`${f.id}_w`] += r[`${f.id}_w`]||0; mtd[`${f.id}_r`] += r[`${f.id}_r`]||0; totalMtdRev += r[`${f.id}_r`]||0; });
+                }
+            });
+
+            let sumHtml = `<tr class="bg-blue-50"><td colspan="6" class="p-2 font-bold text-blue-900">១. លំហូរ New Leads តាមប្រភព</td></tr>`;
+            let mtdTotW=0, mtdTotL=0, todTotW=0, todTotL=0, todTotRev=0;
+            
+            sources.forEach(s => {
+                let tw = todayData[`${s.id}_w`]||0, tl = todayData[`${s.id}_l`]||0, tr = todayData[`${s.id}_r`]||0;
+                todTotW += tw; todTotL += tl; todTotRev += tr;
+                mtdTotW += mtd[`${s.id}_w`]; mtdTotL += mtd[`${s.id}_l`];
+                
+                sumHtml += `<tr>
+                    <td class="p-2 pl-6">${s.name}</td>
+                    <td class="text-center font-semibold text-blue-700">${tw} Won <br><span class="text-xs text-gray-500">(${tl} L / ${fmtMoney(tr)})</span></td>
+                    <td class="text-center text-gray-500">${s.dtgtW} Won <br><span class="text-xs">(${s.dtgtL} L)</span></td>
+                    <td class="text-center font-bold text-blue-900">${mtd[`${s.id}_w`]} Won <br><span class="text-xs text-green-700">(${mtd[`${s.id}_l`]} L / ${fmtMoney(mtd[`${s.id}_r`])})</span></td>
+                    <td class="text-center">${s.tgtW} Won <br><span class="text-xs">(${s.tgtL} L)</span></td>
+                    <td class="text-center font-bold ${getRate(mtd[`${s.id}_w`], s.tgtW) >= '80%' ? 'text-green-600' : 'text-orange-500'}">${getRate(mtd[`${s.id}_w`], s.tgtW)}</td>
+                </tr>`;
+            });
+
+            sumHtml += `<tr class="bg-green-50"><td colspan="6" class="p-2 font-bold text-green-900">២. សកម្មភាពទាក់ទង (Outbound & Follow-up)</td></tr>`;
+            let mtdTotFW=0, mtdTotFA=0;
+            
+            fus.forEach(f => {
+                let tw = todayData[`${f.id}_w`]||0, ta = todayData[`${f.id}_a`]||0, tr = todayData[`${f.id}_r`]||0;
+                mtdTotFW += mtd[`${f.id}_w`]; mtdTotFA += mtd[`${f.id}_a`];
+                todTotRev += tr;
+                
+                sumHtml += `<tr>
+                    <td class="p-2 pl-6">${f.name}</td>
+                    <td class="text-center font-semibold text-green-700">${tw} Won <br><span class="text-xs text-gray-500">(${ta} Acts / ${fmtMoney(tr)})</span></td>
+                    <td class="text-center text-gray-500">${f.dtgtW} Won <br><span class="text-xs">(${f.dtgtA} Acts)</span></td>
+                    <td class="text-center font-bold text-green-900">${mtd[`${f.id}_w`]} Won <br><span class="text-xs text-green-700">(${mtd[`${f.id}_a`]} Acts / ${fmtMoney(mtd[`${f.id}_r`])})</span></td>
+                    <td class="text-center">${f.tgtW} Won <br><span class="text-xs">(${f.tgtA} Acts)</span></td>
+                    <td class="text-center font-bold ${getRate(mtd[`${f.id}_w`], f.tgtW) >= '80%' ? 'text-green-600' : 'text-orange-500'}">${getRate(mtd[`${f.id}_w`], f.tgtW)}</td>
+                </tr>`;
+            });
+            document.getElementById('dashSummaryTable').innerHTML = sumHtml;
+            document.getElementById('cardRevenue').innerText = fmtMoney(totalMtdRev);
+            document.getElementById('cardWon').innerText = (mtdTotW + mtdTotFW) + ' នាក់';
+            document.getElementById('cardLeads').innerText = mtdTotL;
+            document.getElementById('cardFU').innerText = mtdTotFA;
+
+            // --- PART B & C ---
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+            
+            let fun = {};
+            sources.forEach(s => { fun[`${s.id}_l`]=0; fun[`${s.id}_q`]=0; fun[`${s.id}_n`]=0; fun[`${s.id}_w`]=0; fun[`${s.id}_r`]=0; });
+            fus.forEach(f => { fun[`${f.id}_a`]=0; fun[`${f.id}_q`]=0; fun[`${f.id}_n`]=0; fun[`${f.id}_w`]=0; fun[`${f.id}_r`]=0; });
+
+            Object.keys(store).forEach(d => {
+                if (d >= startDate && d <= endDate) {
+                    const r = store[d];
+                    sources.forEach(s => { fun[`${s.id}_l`]+=r[`${s.id}_l`]||0; fun[`${s.id}_q`]+=r[`${s.id}_q`]||0; fun[`${s.id}_n`]+=r[`${s.id}_n`]||0; fun[`${s.id}_w`]+=r[`${s.id}_w`]||0; fun[`${s.id}_r`]+=r[`${s.id}_r`]||0; });
+                    fus.forEach(f => { fun[`${f.id}_a`]+=r[`${f.id}_a`]||0; fun[`${f.id}_q`]+=r[`${f.id}_q`]||0; fun[`${f.id}_n`]+=r[`${f.id}_n`]||0; fun[`${f.id}_w`]+=r[`${f.id}_w`]||0; fun[`${f.id}_r`]+=r[`${f.id}_r`]||0; });
+                }
+            });
+
+            // PART B RENDERING
+            let rawLeadsHtml = '', fNL=0, fNQ=0, fNN=0, fNW=0, fNRev=0;
+            sources.forEach(s => {
+                fNL+=fun[`${s.id}_l`]; fNQ+=fun[`${s.id}_q`]; fNN+=fun[`${s.id}_n`]; fNW+=fun[`${s.id}_w`]; fNRev+=fun[`${s.id}_r`];
+                rawLeadsHtml += `<tr>
+                    <td class="p-2 pl-4">${s.name}</td>
+                    <td class="p-2 text-center font-semibold text-blue-700">${fun[`${s.id}_l`]}</td>
+                    <td class="p-2 text-center text-gray-700">${fun[`${s.id}_q`]}</td>
+                    <td class="p-2 text-center text-orange-600">${fun[`${s.id}_n`]}</td>
+                    <td class="p-2 text-center font-bold text-green-600">${fun[`${s.id}_w`]}</td>
+                    <td class="p-2 text-center font-bold text-blue-800 bg-blue-50">${fmtMoney(fun[`${s.id}_r`])}</td>
+                </tr>`;
+            });
+            rawLeadsHtml += `<tr class="bg-gray-200 font-bold border-t"><td class="p-2 pl-4 text-right">សរុប (Total):</td><td class="text-center">${fNL}</td><td class="text-center">${fNQ}</td><td class="text-center">${fNN}</td><td class="text-center text-green-700">${fNW}</td><td class="text-center text-blue-800">${fmtMoney(fNRev)}</td></tr>`;
+            document.getElementById('dashRawLeads').innerHTML = rawLeadsHtml;
+
+            let rawFUHtml = '', fFA=0, fFQ=0, fFN=0, fFW=0, fFRev=0;
+            fus.forEach(f => {
+                fFA+=fun[`${f.id}_a`]; fFQ+=fun[`${f.id}_q`]; fFN+=fun[`${f.id}_n`]; fFW+=fun[`${f.id}_w`]; fFRev+=fun[`${f.id}_r`];
+                rawFUHtml += `<tr>
+                    <td class="p-2 pl-4">${f.name}</td>
+                    <td class="p-2 text-center font-semibold text-blue-700">${fun[`${f.id}_a`]}</td>
+                    <td class="p-2 text-center text-gray-700">${fun[`${f.id}_q`]}</td>
+                    <td class="p-2 text-center text-orange-600">${fun[`${f.id}_n`]}</td>
+                    <td class="p-2 text-center font-bold text-green-600">${fun[`${f.id}_w`]}</td>
+                    <td class="p-2 text-center font-bold text-green-800 bg-green-50">${fmtMoney(fun[`${f.id}_r`])}</td>
+                </tr>`;
+            });
+            rawFUHtml += `<tr class="bg-gray-200 font-bold border-t"><td class="p-2 pl-4 text-right">សរុប (Total):</td><td class="text-center">${fFA}</td><td class="text-center">${fFQ}</td><td class="text-center">${fFN}</td><td class="text-center text-green-700">${fFW}</td><td class="text-center text-green-800">${fmtMoney(fFRev)}</td></tr>`;
+            document.getElementById('dashRawFU').innerHTML = rawFUHtml;
+
+            // PART C RENDERING
+            let funHtml = `<tr class="bg-gray-100"><td colspan="6" class="p-2 font-bold text-gray-800">១. លំហូរ New Leads</td></tr>`;
+            sources.forEach(s => {
+                let l=fun[`${s.id}_l`], q=fun[`${s.id}_q`], n=fun[`${s.id}_n`], w=fun[`${s.id}_w`], r=fun[`${s.id}_r`];
+                funHtml += `<tr>
+                    <td class="p-3 pl-6">${s.name}</td>
+                    <td class="text-center font-bold text-gray-700">${l}</td>
+                    <td class="text-center">${q} <span class="rate">(${getRate(q,l)})</span></td>
+                    <td class="text-center">${n} <span class="rate">(${getRate(n,q)})</span></td>
+                    <td class="text-center font-bold text-green-600">${w} <span class="rate">(${getRate(w,n)})</span><br><span class="text-xs text-blue-700">(${fmtMoney(r)})</span></td>
+                    <td class="text-center font-bold bg-gray-50 text-gray-800">${getRate(w,l)}</td>
+                </tr>`;
+            });
+            funHtml += `<tr class="bg-gray-100"><td colspan="6" class="p-2 font-bold text-gray-800 mt-4 border-t">២. សកម្មភាពទាក់ទង (Outbound & Follow-up)</td></tr>`;
+            fus.forEach(f => {
+                let a=fun[`${f.id}_a`], q=fun[`${f.id}_q`], n=fun[`${f.id}_n`], w=fun[`${f.id}_w`], r=fun[`${f.id}_r`];
+                funHtml += `<tr>
+                    <td class="p-3 pl-6">${f.name}</td>
+                    <td class="text-center font-bold text-gray-700">${a}</td>
+                    <td class="text-center">${q} <span class="rate">(${getRate(q,a)})</span></td>
+                    <td class="text-center">${n} <span class="rate">(${getRate(n,q)})</span></td>
+                    <td class="text-center font-bold text-green-600">${w} <span class="rate">(${getRate(w,n)})</span><br><span class="text-xs text-green-700">(${fmtMoney(r)})</span></td>
+                    <td class="text-center font-bold bg-gray-50 text-gray-800">${getRate(w,a)}</td>
+                </tr>`;
+            });
+            document.getElementById('dashFunnelTable').innerHTML = funHtml;
+        }
+    </script>
+</body>
+</html>
